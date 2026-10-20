@@ -32,6 +32,20 @@ export function validateVersionChange(base, candidate) {
   assert.ok(Number.isSafeInteger(candidate.ghVersion));
 }
 
+export async function synchronizeReleaseCounter(api, pr, base, candidate) {
+  const manifest = { ...candidate.value, ghVersion: base.ghVersion + 1 };
+  validateVersionChange(base, manifest);
+  if (candidate.value.ghVersion === manifest.ghVersion) return pr.head.sha;
+  const update = await api.request("contents/Info.json", "PUT", {
+    message: "chore: synchronize IINA release counter",
+    content: Buffer.from(JSON.stringify(manifest, null, 2) + "\n").toString("base64"),
+    sha: candidate.sha, branch: pr.head.ref,
+  });
+  // ASVS 15.4.2: validate the write's exact commit; PR metadata may still show its previous head.
+  assert.match(update.commit.sha, /^[a-f0-9]{40}$/);
+  return update.commit.sha;
+}
+
 function subprocess(command, args, cwd = process.cwd()) {
   const environment = { ...process.env };
   delete environment.GH_TOKEN;
@@ -128,22 +142,14 @@ async function publish(api) {
 }
 
 async function prepare(api, number) {
-  let pr = await api.request("pulls/" + number);
+  const pr = await api.request("pulls/" + number);
   const files = await api.request("pulls/" + number + "/files?per_page=100");
   validateCandidate(pr, files, api.repository);
   const baseSHA = (await api.request("git/ref/heads/main")).object.sha;
   assert.equal(pr.base.sha, baseSHA, "Main advanced; rerun release preparation");
   const base = await readJSON(api, "Info.json", baseSHA);
   const candidate = await readJSON(api, "Info.json", pr.head.sha);
-  candidate.value.ghVersion = base.value.ghVersion + 1;
-  validateVersionChange(base.value, candidate.value);
-  await api.request("contents/Info.json", "PUT", {
-    message: "chore: synchronize IINA release counter",
-    content: Buffer.from(JSON.stringify(candidate.value, null, 2) + "\n").toString("base64"),
-    sha: candidate.sha, branch: pr.head.ref,
-  });
-  pr = await api.request("pulls/" + number);
-  const validatedSHA = pr.head.sha;
+  const validatedSHA = await synchronizeReleaseCounter(api, pr, base.value, candidate);
   const source = worktree(validatedSHA);
   try {
     validate(source.directory);

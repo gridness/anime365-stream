@@ -24,3 +24,32 @@ test("release metadata changes preserve permissions and advance IINA's counter e
   assert.throws(() => validateVersionChange(base, { ...next, ghVersion: 1 }));
   assert.throws(() => validateVersionChange(base, { ...next, version: "invalid" }));
 });
+
+test("release validation uses the counter commit even when GitHub's PR head is stale", async () => {
+  const { synchronizeReleaseCounter } = await import("../scripts/release.mjs");
+  const previousSHA = "a".repeat(40);
+  const updatedSHA = "b".repeat(40);
+  const base = { version: "1.0.0", ghVersion: 1 };
+  const candidate = { value: { ...base }, sha: "c".repeat(40) };
+  const pr = { number: 1, head: { ref: "release-please--branches--main", sha: previousSHA } };
+  const api = { async request(route, method, body) {
+    if (method === "PUT") {
+      assert.equal(route, "contents/Info.json");
+      assert.equal(JSON.parse(Buffer.from(body.content, "base64")).ghVersion, 2);
+      assert.equal(body.sha, candidate.sha);
+      assert.equal(body.branch, pr.head.ref);
+      return { commit: { sha: updatedSHA } };
+    }
+    return pr;
+  } };
+  assert.equal(await synchronizeReleaseCounter(api, pr, base, candidate), updatedSHA);
+});
+
+test("release recovery reuses a candidate whose counter is already synchronized", async () => {
+  const { synchronizeReleaseCounter } = await import("../scripts/release.mjs");
+  const base = { version: "1.0.0", ghVersion: 1 };
+  const candidate = { value: { ...base, ghVersion: 2 }, sha: "c".repeat(40) };
+  const pr = { number: 1, head: { ref: "release-please--branches--main", sha: "b".repeat(40) } };
+  const api = { async request() { assert.fail("Recovery must not create another counter commit"); } };
+  assert.equal(await synchronizeReleaseCounter(api, pr, base, candidate), pr.head.sha);
+});
