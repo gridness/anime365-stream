@@ -11,15 +11,21 @@
   "globalEntry": "src/global.js",
   "ghRepo": "gridness/anime365-stream",
   "ghVersion": 1,
-  "permissions": ["network-request"],
+  "permissions": [
+    "network-request"
+  ],
   "sidebarTab": {
     "name": "Anime365"
   },
   "allowedDomains": [
-    "smotret-anime.org", "*.smotret-anime.org",
-    "smotret-anime.co", "*.smotret-anime.co",
-    "smotret-anime.net", "*.smotret-anime.net",
-    "quantum-phantom-moon.ru", "*.quantum-phantom-moon.ru"
+    "smotret-anime.org",
+    "*.smotret-anime.org",
+    "smotret-anime.co",
+    "*.smotret-anime.co",
+    "smotret-anime.net",
+    "*.smotret-anime.net",
+    "quantum-phantom-moon.ru",
+    "*.quantum-phantom-moon.ru"
   ],
   "preferenceDefaults": {
     "rememberSession": false,
