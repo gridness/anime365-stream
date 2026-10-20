@@ -26,6 +26,23 @@ test("autoplay stays in regular episodes and does not skip an unavailable next e
   assert.equal(domain.nextEpisode(episodes, episodes[3]), null);
 });
 
+for (const type of ["tv", "ona", "ova"]) {
+  test("next episode follows " + type + " numbering and excludes other episode types", () => {
+    const episodes = [
+      { id: 4, number: 3, type, active: true },
+      { id: 1, number: 1, type, active: true },
+      { id: 2, number: 1.5, type: "preview", active: true },
+      { id: 5, number: 1.5, type: "special", active: true },
+      { id: 3, number: 2, type, active: false },
+    ];
+    assert.equal(domain.nextEpisode(episodes, episodes[1])?.id, 3);
+    assert.equal(domain.nextEpisode(episodes, episodes[4])?.id, 4);
+    assert.equal(domain.nextEpisode(episodes, episodes[0]), null);
+    assert.equal(domain.nextEpisode(episodes, episodes[2]), null);
+    assert.equal(domain.nextEpisode(episodes, episodes[3]), null);
+  });
+}
+
 test("quality prefers highest available without exceeding a remembered limit", () => {
   const sources = [{ height: 2160 }, { height: 720 }, { height: 1080 }];
   assert.equal(domain.chooseQuality(sources, "highest").height, 2160);

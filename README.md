@@ -24,7 +24,7 @@ Signing out stops playback and disables remembered sign-in. Viewing history stay
 
 Continue watching shows one entry per series. It resumes the last unfinished episode, or offers the next regular episode after completion. Each episode retains its own position. Completion means reaching actual EOF; stopping during credits keeps the saved position.
 
-Autoplay defaults to on and can be switched off in the playback controls. It advances through regular episodes in the same series. Specials and previews require manual selection. An unavailable next episode stops autoplay rather than being skipped.
+Autoplay defaults to on and can be switched off in the playback controls. It advances through numbered TV, ONA, or OVA episodes of the same type in the same series. Specials and previews require manual selection. An unavailable next episode stops autoplay rather than being skipped.
 
 Translation preferences match the language, dub/subtitle kind, author group, and TV or Blu-ray source. Missing or ambiguous matches show the picker. Changing translation or quality preserves the current position. Start over resets it. Quality defaults to the highest resolution; a remembered limit selects the best available resolution at or below it.
 
@@ -67,9 +67,11 @@ The native playback check requires installed IINA and ffmpeg:
 
 ```sh
 python3 scripts/check-iina-runtime.py
+python3 scripts/check-iina-runtime.py --episode-type ona
+python3 scripts/check-iina-runtime.py --episode-type ova
 ```
 
-It stages a temporary plugin with its own identity, requests public API data without credentials, and plays a generated local video and ASS subtitle through the actual controller and player. It checks background HTTP, native plugin messaging, subtitle selection and text, sidebar loading, and real EOF, then closes its process and removes its link. It does not verify subscriber media access.
+It stages a temporary plugin with its own identity, uses a local HTTP fixture without credentials, and plays generated local clips and an ASS subtitle through the actual controller and player. It clicks Next episode in the sidebar, verifies autoplay and stopping at the series end, and checks background HTTP, player reuse, native messaging, and subtitle rendering. It then closes its process and removes its link. It does not verify subscriber media access.
 
 IINA resolves HTTP promises on a background queue and calls global message listeners synchronously. Player creation runs in a main-loop timer callback; messages in both directions are deferred to separate turns to avoid a reproduced JavaScriptCore crash. Keep these boundaries when extending playback.
 

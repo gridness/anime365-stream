@@ -4,7 +4,7 @@ const { createController } = require("../src/controller.js");
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
-async function fixture(mainOnly = false, subtitlesUrl = null) {
+async function fixture(mainOnly = false, subtitlesUrl = null, episodeType = "tv") {
   const values = {};
   const commands = [];
   const requests = [];
@@ -12,7 +12,7 @@ async function fixture(mainOnly = false, subtitlesUrl = null) {
   let background = false;
   let mainDispatches = 0;
   let controller;
-  const episodes = [20, 21].map((id, index) => ({ id, episodeInt: index + 1, episodeType: "tv", episodeFull: "Episode " + (index + 1), isActive: 1 }));
+  const episodes = [20, 21].map((id, index) => ({ id, episodeInt: index + 1, episodeType, episodeFull: "Episode " + (index + 1), isActive: 1 }));
   const host = {
     http: { async get(url) {
       background = true;
@@ -125,6 +125,28 @@ test("EOF autoplays the next regular episode and disabling autoplay retains comp
   assert.equal(f.controller.state().history[0].completed, true);
   assert.equal(f.controller.state().history[0].next, null);
 });
+
+for (const type of ["ona", "ova"]) {
+  test("Next episode advances a numbered " + type.toUpperCase() + " series", async () => {
+    const f = await fixture(false, null, type);
+    await f.play();
+    f.event("loaded");
+    await f.controller.dispatch("next");
+    assert.equal(f.controller.state().current.episode.id, 21);
+    assert.equal(f.opens().length, 2);
+    assert.equal(f.opens()[1].position, 0);
+  });
+
+  test("EOF autoplays a numbered " + type.toUpperCase() + " series", async () => {
+    const f = await fixture(false, null, type);
+    await f.play();
+    f.setPosition(1200);
+    f.event("completed");
+    await settle();
+    assert.equal(f.controller.state().current.episode.id, 21);
+    assert.equal(f.opens().length, 2);
+  });
+}
 
 test("returning to an earlier unfinished episode restores its own position", async () => {
   const f = await fixture();

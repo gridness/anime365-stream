@@ -93,6 +93,26 @@ test("real EOF completes exactly once and early EOF reports a playback failure",
   assert.equal(early.messages.at(-1).kind, "failed");
 });
 
+test("EOF delivered through end-file completes before the next poll", () => {
+  const f = fixture();
+  f.open();
+  f.status.position = 1200;
+  f.eof(true);
+  f.listeners.get("mpv.end-file")();
+  f.player.poll();
+  assert.equal(f.messages.filter((value) => value.kind === "completed").length, 1);
+  assert.ok(!f.messages.some((value) => value.kind === "stopped"));
+});
+
+test("truncated EOF delivered through end-file reports failure instead of manual Stop", () => {
+  const f = fixture();
+  f.open(300);
+  f.eof(true);
+  f.listeners.get("mpv.end-file")();
+  assert.equal(f.messages.at(-1).kind, "failed");
+  assert.ok(!f.messages.some((value) => ["stopped", "completed"].includes(value.kind)));
+});
+
 test("opening failure is reported once and playback sidebar opens after window load", () => {
   const f = fixture();
   f.listeners.get("iina.window-loaded")();

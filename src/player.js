@@ -119,6 +119,9 @@ function createPlayer(host, clock = { setTimeout, clearTimeout, setInterval, now
     host.event.on("mpv.file-loaded", loaded);
     host.event.on("mpv.pause.changed", () => { checkpoint(true); poll(); });
     host.event.on("mpv.end-file", () => {
+      // EOF can arrive before the poll timer or pause notification. Classify
+      // it before end-file changes the phase and prevents further EOF checks.
+      poll();
       if (current && current.phase === "playing") {
         checkpoint(true);
         current.phase = "stopped";

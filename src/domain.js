@@ -94,9 +94,9 @@ function orderedEpisodes(values) {
 }
 
 function nextEpisode(values, current) {
-  if (current.type !== "tv") return null;
+  if (!["tv", "ona", "ova"].includes(current.type)) return null;
   return orderedEpisodes(values).find((value) =>
-    value.type === "tv" && value.number > current.number) || null;
+    value.type === current.type && value.number > current.number) || null;
 }
 
 function chooseQuality(values, preferred) {
