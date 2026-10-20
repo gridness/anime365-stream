@@ -1,7 +1,7 @@
 {
   "name": "Anime365",
   "identifier": "io.github.gridness.anime365-stream",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Find and watch Anime365 episodes in IINA.",
   "author": {
     "name": "gridness",
@@ -10,7 +10,7 @@
   "entry": "src/index.js",
   "globalEntry": "src/global.js",
   "ghRepo": "gridness/anime365-stream",
-  "ghVersion": 3,
+  "ghVersion": 4,
   "permissions": [
     "network-request"
   ],
