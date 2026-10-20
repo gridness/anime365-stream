@@ -10,7 +10,7 @@
   "entry": "src/index.js",
   "globalEntry": "src/global.js",
   "ghRepo": "gridness/anime365-stream",
-  "ghVersion": 3,
+  "ghVersion": 4,
   "permissions": [
     "network-request"
   ],
