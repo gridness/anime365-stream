@@ -145,7 +145,7 @@ async function publish(api) {
     const archive = fs.readFileSync(path.join(source.directory, "dist", filename));
     await upload(api, release, filename, archive);
     await upload(api, release, "SHA256SUMS", Buffer.from(hash(archive) + "  " + filename + "\n"));
-    if (release.draft) await api.request("releases/" + release.id, "PATCH", { draft: false });
+    if (release.draft) await api.request("releases/" + release.id, "PATCH", { draft: false, tag_name: tag, target_commitish: sha });
     console.log("Verified and published " + tag + ".");
   } finally { source.clean(); }
 }
