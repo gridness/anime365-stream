@@ -39,16 +39,28 @@ jobs:
           node --test tests/*.test.js
           node scripts/check-commits.mjs
           python3 scripts/package.py
-      - name: Prepare release PR or draft release
+      - name: Create draft release from merged metadata
         id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-      - name: Validate, merge release PR, and publish installer
+          skip-github-pull-request: true
+      - name: Publish installer before calculating the next version
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_PRS: ${{ steps.release.outputs.prs }}
           RELEASE_TAG: ${{ steps.release.outputs.tag_name }}
           RELEASE_SHA: ${{ steps.release.outputs.sha }}
-        run: node scripts/release.mjs
+        run: node scripts/release.mjs publish
+      - name: Prepare release PR
+        id: candidate
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          skip-github-release: true
+      - name: Validate and merge release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PRS: ${{ steps.candidate.outputs.prs }}
+        run: node scripts/release.mjs prepare

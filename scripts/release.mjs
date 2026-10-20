@@ -119,11 +119,20 @@ async function upload(api, release, filename, content) {
   if (!response.ok) throw new Error("Release asset upload failed (" + response.status + ")");
 }
 
+export async function findRelease(api, tag) {
+  const release = await api.request("releases/tags/" + tag, "GET", undefined, true);
+  if (release) return release;
+  const releases = await api.request("releases?per_page=100");
+  const drafts = releases.filter((item) => item.draft && item.tag_name === tag);
+  assert.ok(drafts.length <= 1, "More than one draft has the requested release version");
+  return drafts[0] || null;
+}
+
 async function publish(api) {
   const main = (await readJSON(api, "Info.json", "main")).value;
   const tag = process.env.RELEASE_TAG || "v" + main.version;
   assert.match(tag, /^v\d+\.\d+\.\d+$/);
-  const release = await api.request("releases/tags/" + tag, "GET", undefined, true);
+  const release = await findRelease(api, tag);
   if (!release) return;
   const sha = process.env.RELEASE_SHA || release.target_commitish;
   assert.match(sha, /^[a-f0-9]{40}$/, "Recovery needs the release's exact target SHA");
@@ -173,7 +182,9 @@ async function main() {
   assert.equal(repository, "gridness/anime365-stream");
   assert.ok(process.env.GH_TOKEN, "GH_TOKEN is required in GitHub Actions");
   const api = client(repository, process.env.GH_TOKEN);
-  await publish(api);
+  const operation = process.argv[2];
+  assert.ok(["publish", "prepare"].includes(operation), "Choose publish or prepare");
+  if (operation === "publish") return publish(api);
   const prs = JSON.parse(process.env.RELEASE_PRS || "[]");
   for (const pr of prs) {
     assert.ok(Number.isSafeInteger(pr.number) && pr.number > 0);

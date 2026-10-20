@@ -12,11 +12,11 @@ An unreleased repository begins with an empty `.release-please-manifest.json`; `
 
 ## Automatic sequence
 
-1. Validate main and run release-please. Eligible Conventional Commits create or update its release PR. Documentation and verification paths are excluded from version calculation.
-2. Accept only the bot's expected release branch, in this repository, targeting main. Permit changes only to `Info.json`, `version.txt`, `CHANGELOG.md`, and `.release-please-manifest.json`.
-3. Set `Info.json.ghVersion` to main's value plus one. Check out the final candidate SHA, validate its manifest and behavior, and build its installer. Confirm main has not advanced.
-4. Post a `release-candidate` status and merge with the validated expected SHA. Dispatch the release workflow explicitly; a `GITHUB_TOKEN` merge does not trigger an ordinary push run.
-5. Release-please creates a draft release. Validate and package its exact SHA, attach one `.iinaplgz` asset and `SHA256SUMS`, then publish it.
+1. Validate main and let release-please create a draft for any merged release metadata. Validate and package its exact SHA, attach one `.iinaplgz` asset and `SHA256SUMS`, then publish it. Draft recovery also checks the release list because a draft without a published tag can return 404 from the tag lookup.
+2. After publication, run release-please's PR preparation separately. Eligible Conventional Commits create or update its release PR. Documentation and verification paths are excluded from version calculation. Publishing first keeps unreleased draft history out of the next version calculation.
+3. Accept only the bot's expected release branch, in this repository, targeting main. Permit changes only to `Info.json`, `version.txt`, `CHANGELOG.md`, and `.release-please-manifest.json`.
+4. Set `Info.json.ghVersion` to main's value plus one. Validate and package the SHA returned by that write, since GitHub's PR head metadata can lag behind it. Reuse the candidate SHA if its counter already matches. Confirm main has not advanced.
+5. Post a `release-candidate` status and merge with the validated expected SHA. Dispatch the release workflow explicitly; a `GITHUB_TOKEN` merge does not trigger an ordinary push run.
 
 IINA discovers updates through `main/Info.json` and compares the increasing integer `ghVersion`. It installs from the latest published release. Those manifests must match. The brief interval between merging version metadata and publishing assets cannot be made atomic across these separate endpoints.
 

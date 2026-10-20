@@ -53,3 +53,28 @@ test("release recovery reuses a candidate whose counter is already synchronized"
   const api = { async request() { assert.fail("Recovery must not create another counter commit"); } };
   assert.equal(await synchronizeReleaseCounter(api, pr, base, candidate), pr.head.sha);
 });
+
+test("publication finds an untagged draft when GitHub's tag lookup returns 404", async () => {
+  const { findRelease } = await import("../scripts/release.mjs");
+  const draft = { id: 1, tag_name: "v1.0.0", draft: true };
+  const api = { async request(route) {
+    if (route === "releases/tags/v1.0.0") return null;
+    assert.equal(route, "releases?per_page=100");
+    return [{ id: 2, tag_name: "v0.9.0", draft: true }, draft];
+  } };
+  assert.equal(await findRelease(api, "v1.0.0"), draft);
+});
+
+test("draft discovery ignores other versions and leaves published tag lookup unchanged", async () => {
+  const { findRelease } = await import("../scripts/release.mjs");
+  const published = { id: 1, tag_name: "v1.0.0", draft: false };
+  const direct = { async request(route) {
+    assert.equal(route, "releases/tags/v1.0.0");
+    return published;
+  } };
+  assert.equal(await findRelease(direct, "v1.0.0"), published);
+  const missing = { async request(route) {
+    return route.startsWith("releases/tags/") ? null : [{ id: 2, tag_name: "v0.9.0", draft: true }];
+  } };
+  assert.equal(await findRelease(missing, "v1.0.0"), null);
+});
