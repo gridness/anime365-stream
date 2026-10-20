@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/gridness/anime365-stream/compare/v1.1.0...v1.1.1) (2026-10-20)
+
+
+### Fixes
+
+* preserve the version tag when publishing a draft ([728631f](https://github.com/gridness/anime365-stream/commit/728631ff90bf079291fa621a1b90647e3481165c))
+
 ## [1.1.0](https://github.com/gridness/anime365-stream/compare/v1.0.0...v1.1.0) (2026-10-20)
 
 
