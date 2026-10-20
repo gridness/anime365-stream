@@ -1,0 +1,28 @@
+{
+  "name": "Anime365",
+  "identifier": "io.github.gridness.anime365-stream",
+  "version": "1.0.0",
+  "description": "Find and watch Anime365 episodes in IINA.",
+  "author": {
+    "name": "gridness",
+    "url": "https://github.com/gridness"
+  },
+  "entry": "src/index.js",
+  "globalEntry": "src/global.js",
+  "ghRepo": "gridness/anime365-stream",
+  "ghVersion": 1,
+  "permissions": ["network-request"],
+  "sidebarTab": {
+    "name": "Anime365"
+  },
+  "allowedDomains": [
+    "smotret-anime.org", "*.smotret-anime.org",
+    "smotret-anime.co", "*.smotret-anime.co",
+    "smotret-anime.net", "*.smotret-anime.net",
+    "quantum-phantom-moon.ru", "*.quantum-phantom-moon.ru"
+  ],
+  "preferenceDefaults": {
+    "rememberSession": false,
+    "libraryV1": "{}"
+  }
+}

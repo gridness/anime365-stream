@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "anime365-stream",
+      "initial-version": "1.0.0",
+      "version-file": "version.txt",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
+      "draft": true,
+      "extra-files": [
+        { "type": "json", "path": "Info.json", "jsonpath": "$.version" }
+      ],
+      "exclude-paths": [
+        "docs", "README.md", "GLOSSARY.md", "AGENTS.md", "CHANGELOG.md",
+        "tests", ".gitignore", "jsconfig.json", "scripts/check-webview.swift", "scripts/check-iina-runtime.py"
+      ],
+      "changelog-sections": [
+        { "type": "feat", "section": "Features", "hidden": false },
+        { "type": "fix", "section": "Fixes", "hidden": false },
+        { "type": "perf", "section": "Performance", "hidden": false },
+        { "type": "refactor", "section": "Maintenance", "hidden": false },
+        { "type": "build", "section": "Build", "hidden": false },
+        { "type": "ci", "section": "Automation", "hidden": false },
+        { "type": "chore", "section": "Maintenance", "hidden": false },
+        { "type": "test", "section": "Tests", "hidden": false },
+        { "type": "style", "section": "Maintenance", "hidden": false },
+        { "type": "revert", "section": "Reverts", "hidden": false },
+        { "type": "docs", "section": "Documentation", "hidden": false }
+      ]
+    }
+  }
+}
